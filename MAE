@@ -1,0 +1,41 @@
+#Packages
+import geopandas as gpd
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#Open files
+shp_path = ("C:/Datapixel_NDVI.shp")  
+data = gpd.read_file(shp_path)
+data_filtered = data.dropna(subset=['NDVI_Sat', 'NDVI_Dron'])
+data_filtered['NDVI_Sat'] = pd.to_numeric(data_filtered['NDVI_Sat'], errors='coerce')
+data_filtered['NDVI_Dron'] = pd.to_numeric(data_filtered['NDVI_Dron'], errors='coerce')
+
+#MAE RSME
+mae = np.mean(np.abs(data_filtered['NDVI_Sat'] - data_filtered['NDVI_Dron']))
+rmse = np.sqrt(np.mean((data_filtered['NDVI_Sat'] - data_filtered['NDVI_Dron']) ** 2))
+
+print(f"mean Absolute Error (MAE): {mae}")
+print(f"Root mean Square Error (RMSE): {rmse}")
+
+#Scatter plot
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=data_filtered['NDVI_Sat'], y=data_filtered['NDVI_Dron'], alpha=0.7)
+plt.plot([0, 1], [0, 1], color='red', linestyle='--', label='1:1 Line')  # Línea de identidad
+plt.title("Scatter Plot of NDVI Satellite vs Drone")
+plt.xlabel("NDVI Satellite")
+plt.ylabel("NDVI Drone")
+plt.legend()
+plt.grid()
+plt.show()
+
+#Histogram
+plt.figure(figsize=(10, 6))
+differences = data_filtered['NDVI_Sat'] - data_filtered['NDVI_Dron']
+sns.histplot(differences, bins=30, kde=True, color='blue')
+plt.title("Histogram of Differences (NDVI Satellite - NDVI Drone)")
+plt.xlabel("Difference")
+plt.ylabel("Frequency")
+plt.grid()
+plt.show()
